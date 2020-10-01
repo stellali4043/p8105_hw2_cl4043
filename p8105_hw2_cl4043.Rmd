@@ -124,10 +124,63 @@ distinct_stations<- distinct(nyc_transit_tidy, station_name, line, ada, vending)
 ## Problem 3
 
 ```{r}
-# define a path to the dataset. 
+# define paths to the datasets. 
 path_to_data3 = "./data/pols-month.csv"
+path_to_data4 = "./data/snp.csv"
+path_to_data5 = "./unemployment.csv"
+```
+
+```{r message=FALSE}
+# read the pols-month.csv
+# separate() to break up the variable mon into integer variables year, month, and day
+pols_month_df =
+  read_csv("./data/pols-month.csv"
+           ) %>%
+  janitor::clean_names() %>%
+  separate(mon, c("year", "month", "day")) %>%
+  mutate_at(vars(month), as.factor)
+
+# replace month number with month name
+pols_month_df$month <- month.abb[pols_month_df$month]
+
+# create a president variable taking values gop and dem, and remove prez_dem and prez_gop; and remove the day variable.
+pols_month_df <- pols_month_df %>%
+  mutate(president = case_when(
+    prez_gop == 1 ~ 'gop',
+    prez_dem == 1 ~ 'dem'
+)) 
+pols_month_df <- pols_month_df[-c(3,4,8)]
 ```
 
 
+```{r, message=FALSE}
+# separate() to break up the variable mon into integer variables year, month, and day
+# arrange according to year and month, and organize so that year and month are the leading columns
+snp_df =
+  read_csv("./data/snp.csv"
+           ) %>%
+  janitor::clean_names() %>%
+  separate(date, c("day", "month", "year")) %>%
+  arrange(year, month) %>%
+  relocate(year, month)
 
+```
+
+```{r, message=FALSE}
+unemployment_df =
+  read_csv("./data/unemployment.csv"
+           ) %>%
+  janitor::clean_names() 
+
+unemployment_long = 
+  pivot_longer(
+    unemployment_df, 
+    jan:dec,
+    names_to = "month", 
+    values_to = "unemployment_rate")
+
+
+
+
+```
 
