@@ -186,7 +186,6 @@ merge_df =
 
 merge_final = 
   left_join(merge_df, unemployment_long, by ="month")
-
-
 ```
 
+The dimension of the resulting dataset is `r dim(merge_final)`, and contains variables such as "month", "unemployment_rate", and "president". The range of the years is `r range(merge_final$Year)`.
