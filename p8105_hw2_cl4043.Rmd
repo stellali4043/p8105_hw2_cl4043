@@ -5,21 +5,17 @@ output: github_document
 ---
 This is my solution for hw2
 
-```{r setup}
+```{r message=FALSE}
 library(tidyverse)
 library(readxl)
+library(readr)
 ```
 
 ## Problem 1
 
-```{r message=FALSE}
-# read in the data
-Trash_Wheel_Collection_Totals_8_6_19 <- read_excel("Trash-Wheel-Collection-Totals-8-6-19.xlsx")
-```
-
 ```{r}
 # First, define a path to the dataset. 
-path_to_data = "./Trash-Wheel-Collection-Totals-8-6-19.xlsx"
+path_to_data = "./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx"
 ```
 
 
@@ -43,7 +39,7 @@ trashwheel_df =
 # Read precipitation data! For 2018 and 2017. 
 precip_2018 = 
 	read_excel(
-		"./Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+		"./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
 		sheet = "2018 Precipitation",
 		skip = 1
 	) %>% 
@@ -53,7 +49,7 @@ precip_2018 =
 	relocate(year)
 precip_2017 = 
 	read_excel(
-		"./Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+		"./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
 		sheet = "2017 Precipitation",
 		skip = 1
 	) %>% 
@@ -81,4 +77,52 @@ This dataset contains information from the Mr. Trashwheel trash collector in Bal
 
 * The median number of sports balls found in a dumpster in 2017 was `r trashwheel_df %>% filter(year == 2017) %>% pull(sports_balls) %>% median()`
 * The total precipitation in 2018 was `r precip_df %>% filter(year == 2018) %>% pull(total) %>% sum()` inches.
+
+## Problem 2
+
+```{r}
+# define a path to the dataset. 
+path_to_data2 = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv"
+```
+
+```{r message=FALSE}
+# read the nyc transit data
+# retain line, station, name, station latitude / longitude, routes served, entry, vending, entrance type, and ADA compliance
+nyc_transit =
+  read_csv("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv"
+           ) %>%
+  janitor::clean_names() %>%
+  select(line:route11, entrance_type, entry, vending, ada) %>%
+  mutate_at(vars(route1:route11), as.factor) %>%
+  mutate(entry = recode(entry, `YES` = TRUE, `NO` = FALSE)) # converting entry variable to a logical variable
+```
+
+```{r}
+# tidying nyc_transit data to a long table by route number
+nyc_transit_tidy = 
+  pivot_longer(
+    nyc_transit, 
+    route1:route11,
+    names_to = "route_number", 
+    values_to = "route")
+
+# dropping the NA value when route value contains NA of each route number
+nyc_transit_tidy <- nyc_transit_tidy %>% 
+  drop_na()
+```
+
+This dataset contains information about the train transit system in NYC. The dataset contains variables such as, `r names(nyc_transit_tidy)`. I first used the cleaned the names of each variable, and then I used the select function to only retain the variables of interest. I noticed there were both characters and numerics in the values of route number, so I turned them all into factor. I realized the route numbers columns were spread across the original dataset, so I used pivot_longer to make it into a long table, and then dropped the rows where the route value is NA. The dimension of the resulting dataset is `r dim(nyc_transit_tidy)`, which means there are in total 4270 rows of observations, and 10 columns.
+
+* There are `r nrow(distinct(nyc_transit_tidy, station_name, line))` distinct stations.
+```{r, echo=FALSE}
+distinct_stations<- distinct(nyc_transit_tidy, station_name, line, ada, vending)
+```
+* Among the distinct stations, there are `r nrow(filter(distinct_stations, ada == "TRUE"))` stations that are ADA compliant.
+* There are `r nrow(filter(nyc_transit_tidy,route ==  "A"))` distinct stations that serve the A station, and among these stations, `r nrow(filter(nyc_transit_tidy,route == "A" & ada == "TRUE"))` stations are ADA compliant.
+* The proportion of station entrances / exits without vending allow entrance is `r nrow(filter(nyc_transit_tidy,vending == "NO"))/nrow(nyc_transit_tidy)`.
+
+
+
+
+
 
