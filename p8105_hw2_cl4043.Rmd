@@ -3,7 +3,7 @@ title: "p8105_hw2_cl4043"
 author: Stella Li
 output: github_document
 ---
-This is my solution for hw2
+This is my solution for hw2.
 
 ```{r message=FALSE}
 library(tidyverse)
@@ -121,7 +121,12 @@ distinct_stations<- distinct(nyc_transit_tidy, station_name, line, ada, vending)
 * There are `r nrow(filter(nyc_transit_tidy,route ==  "A"))` distinct stations that serve the A station, and among these stations, `r nrow(filter(nyc_transit_tidy,route == "A" & ada == "TRUE"))` stations are ADA compliant.
 * The proportion of station entrances / exits without vending allow entrance is `r nrow(filter(nyc_transit_tidy,vending == "NO"))/nrow(nyc_transit_tidy)`.
 
+## Problem 3
 
+```{r}
+# define a path to the dataset. 
+path_to_data3 = "./data/pols-month.csv"
+```
 
 
 
